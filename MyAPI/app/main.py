@@ -2,6 +2,7 @@
 from fastapi import FastAPI, status, HTTPException
 from typing import Optional
 import asyncio
+from pydantic import BaseModel, Field
 
 #3. Inicializaciones APP
 app = FastAPI(
@@ -16,6 +17,12 @@ usuarios = [
     {"id": 2, "nombre": "berni", "edad": 20},
     {"id": 3, "nombre": "Marco", "edad": 24},
 ]
+
+# Modelo de Validacion de pydantic
+class crear_usuario(BaseModel):
+    id: int = Field(...,gt=0, description="Identificar de usuario")
+    nombre: str= Field(..., min_length=3, max_length=50,example="juata")
+    edad: int= Field(...,ge=1,le=123,description="Edad valida entre 1 y 123")
 
 #4. Endpoints
 @app.get("/", tags=['Inicio'])
@@ -37,7 +44,7 @@ async def promedio():
 @app.get("/v1/usuario/{id}", tags=['Parametros'])
 async def ConsultaUno(id: int):
     await asyncio.sleep(2)
-    
+
     usuario = next((usr for usr in usuarios if usr["id"] == id), None)
     if usuario:
         return {
@@ -55,14 +62,17 @@ async def consultaT():
     }
 
 @app.post("/v1/usuarios", tags=['CRUD HTTP'])
-async def crear_usuario(usuario: dict):
+async def crear_usuario(usuario: crear_usuario):
     # Verificar si ya existe un usuario con el mismo id
-    if any(usr["id"] == usuario.get("id") for usr in usuarios):
+    if any(usr["id"] == usuario.id for usr in usuarios):
         raise HTTPException(
             status_code=400,
             detail="El id ya existe"
         )
-    usuarios.append(usuario)
+
+    # ✅ guardar como dict (no como objeto pydantic)
+    usuarios.append(usuario.dict())
+
     return {
         "mensaje": "Usuario agregado correctamente",
         "status": "200",
@@ -75,14 +85,13 @@ async def actualizar_usuario(id: int, usuario: dict):
         if usr["id"] == id:
             usr.update(usuario)
             return {
-                "mensaje": "Usuario actualizado", 
+                "mensaje": "Usuario actualizado",
                 "usuario": usr
-                }
+            }
     raise HTTPException(
-        status_code=404, 
+        status_code=404,
         detail="Usuario no encontrado"
-        )
-
+    )
 
 @app.delete("/v1/usuarios/{id}", tags=['CRUD HTTP'])
 async def eliminar_usuario(id: int):
@@ -91,13 +100,10 @@ async def eliminar_usuario(id: int):
             usuarios.remove(usr)
             return {
                 "mensaje": "Usuario eliminado"
-                }
-    raise HTTPException(status_code=404, detail="Usuario no encontrado")
+            }
+    raise HTTPException(status_code=404, detail="no hay usuarios")
 
 
-    
-    
-    
 
     
     
