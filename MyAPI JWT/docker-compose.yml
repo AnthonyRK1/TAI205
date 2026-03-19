@@ -1,0 +1,13 @@
+version: '3'
+services:
+  api:
+    build: .
+    container_name: server_FastAPIz
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app/app
+
+
+   
+    

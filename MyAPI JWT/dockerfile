@@ -1,0 +1,20 @@
+# IMPORTAMOS LA IMAGEN DE BASE DE PYTHON 
+FROM python:3.12-slim
+
+# CREAR CARPETA DE TRABAJO
+WORKDIR /app
+
+# Copiar los requerimientos a la carpeta de trabajo
+COPY requirements.txt .
+
+# Instalar los requerimientos
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar los archivos de la API
+COPY ./app ./app
+
+# Exponer el puerto
+EXPOSE 5000
+
+# Comando para ejecutar la API
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]

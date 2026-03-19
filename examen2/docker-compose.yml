@@ -1,9 +1,0 @@
-version: '3.8'
-
-services:
-  examen2:
-    build: .
-    container_name: examen2_container
-    ports:
-      - "5055:5055"
-    restart: unless-stopped
